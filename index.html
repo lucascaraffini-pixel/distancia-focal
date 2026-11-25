@@ -1,0 +1,1022 @@
+<!DOCTYPE html>
+<html lang="pt-BR" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Distância e Enquadramento Fotográfico</title>
+    <!-- Carregamento do Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Fonte Inter do Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    
+    <script>
+        // Configuração de tema personalizada do Tailwind
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                    },
+                    colors: {
+                        studio: {
+                            950: '#090d16',
+                            900: '#0f1623',
+                            850: '#141d2e',
+                            800: '#1c2638',
+                            700: '#2a374e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        /* Estilização customizada para sliders (range inputs) no estilo software de estúdio */
+        input[type="range"] {
+            -webkit-appearance: none;
+            appearance: none;
+            background: transparent;
+            cursor: pointer;
+        }
+        input[type="range"]::-webkit-slider-runnable-track {
+            height: 6px;
+            border-radius: 9999px;
+            background: #2a374e;
+        }
+        input[type="range"]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #f59e0b;
+            border: 2px solid #090d16;
+            margin-top: -6px;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.45);
+            transition: transform 0.15s ease, background-color 0.15s ease;
+        }
+        input[type="range"]::-webkit-slider-thumb:hover {
+            transform: scale(1.15);
+            background: #fbbf24;
+        }
+        input[type="range"].cyan-slider::-webkit-slider-thumb {
+            background: #06b6d4;
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.45);
+        }
+        input[type="range"].cyan-slider::-webkit-slider-thumb:hover {
+            background: #22d3ee;
+        }
+
+        /* Firefox */
+        input[type="range"]::-moz-range-track {
+            height: 6px;
+            border-radius: 9999px;
+            background: #2a374e;
+        }
+        input[type="range"]::-moz-range-thumb {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            background: #f59e0b;
+            border: 2px solid #090d16;
+            box-shadow: 0 0 10px rgba(245, 158, 11, 0.45);
+        }
+        input[type="range"].cyan-slider::-moz-range-thumb {
+            background: #06b6d4;
+            box-shadow: 0 0 10px rgba(6, 182, 212, 0.45);
+        }
+
+        /* Remove setas padrão de inputs numéricos para visual mais limpo */
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            opacity: 0.4;
+        }
+    </style>
+</head>
+<body class="bg-studio-950 text-slate-100 font-sans antialiased min-h-screen selection:bg-amber-500/30 selection:text-amber-200">
+
+    <!-- Cabeçalho Principal -->
+    <header class="border-b border-slate-800/80 bg-studio-900/80 backdrop-blur-md sticky top-0 z-30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-amber-500 to-amber-600 flex items-center justify-center shadow-lg shadow-amber-500/20 shrink-0">
+                    <!-- Ícone de Lente / Obturador -->
+                    <svg class="w-6 h-6 text-slate-950" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="9"></circle>
+                        <circle cx="12" cy="12" r="3.5"></circle>
+                        <path d="M12 3v5.5M12 15.5V21M3 12h5.5M15.5 12H21" stroke-linecap="round"></path>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white">
+                        Calculadora de Distância e Enquadramento Fotográfico
+                    </h1>
+                    <p class="text-xs sm:text-sm text-slate-400">
+                        Planejamento óptico de estúdio e locação em tempo real
+                    </p>
+                </div>
+            </div>
+            <div class="flex items-center gap-2 text-xs font-medium text-slate-400 bg-studio-850 border border-slate-800 px-3 py-1.5 rounded-full self-start sm:self-auto">
+                <span class="w-2 h-2 rounded-full bg-emerald-400 animate-pulse"></span>
+                Cálculo em tempo real
+            </div>
+        </div>
+    </header>
+
+    <!-- Conteúdo Principal -->
+    <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 sm:py-8 space-y-6">
+
+        <!-- Grid Principal: Controles à Esquerda | Resultados e Visualizadores à Direita -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+
+            <!-- COLUNA ESQUERDA: PAINEL DE CONTROLES -->
+            <section class="lg:col-span-5 space-y-5">
+
+                <!-- Card 1: Sensor da Câmera -->
+                <div class="bg-studio-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                            <span class="w-1.5 h-4 rounded-full bg-amber-500"></span>
+                            1. Sensor da Câmera
+                        </h2>
+                        <span id="sensorDimBadge" class="text-xs font-mono text-cyan-400 bg-cyan-950/60 border border-cyan-800/50 px-2.5 py-0.5 rounded-md">
+                            23,5 × 15,7 mm
+                        </span>
+                    </div>
+
+                    <div id="sensorButtons" class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                        <!-- Botões preenchidos via JS -->
+                    </div>
+                </div>
+
+                <!-- Card 2: Distância Focal da Lente -->
+                <div class="bg-studio-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                    <div class="flex items-center justify-between mb-3">
+                        <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                            <span class="w-1.5 h-4 rounded-full bg-amber-500"></span>
+                            2. Distância Focal (Lente)
+                        </h2>
+                        <div class="flex items-center gap-1.5 bg-studio-950 border border-slate-700 rounded-lg px-2.5 py-1 focus-within:border-amber-500 transition-colors">
+                            <input type="number" id="focalInput" min="10" max="600" step="1" value="50"
+                                class="w-16 bg-transparent text-right text-base font-bold text-amber-400 focus:outline-none">
+                            <span class="text-xs font-semibold text-slate-400">mm</span>
+                        </div>
+                    </div>
+
+                    <!-- Slider de 10mm a 600mm -->
+                    <div class="mb-4">
+                        <input type="range" id="focalSlider" min="10" max="600" step="1" value="50" class="w-full">
+                        <div class="flex justify-between text-[11px] text-slate-500 font-mono mt-1">
+                            <span>10 mm</span>
+                            <span>100 mm</span>
+                            <span>300 mm</span>
+                            <span>600 mm</span>
+                        </div>
+                    </div>
+
+                    <!-- Atalhos (Presets) -->
+                    <div>
+                        <p class="text-xs text-slate-400 mb-2">Atalhos de lentes comuns:</p>
+                        <div id="focalPresets" class="grid grid-cols-5 gap-1.5">
+                            <!-- Botões preenchidos via JS -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card 3: Retângulo Alvo (Enquadramento Desejado) -->
+                <div class="bg-studio-900 border border-slate-800 rounded-2xl p-5 shadow-xl">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 class="text-sm font-semibold uppercase tracking-wider text-slate-300 flex items-center gap-2">
+                            <span class="w-1.5 h-4 rounded-full bg-cyan-400"></span>
+                            3. Retângulo Alvo (Enquadramento)
+                        </h2>
+                    </div>
+
+                    <!-- Seletor de Orientação -->
+                    <div class="grid grid-cols-2 gap-2.5 mb-4">
+                        <button type="button" id="btnVertical"
+                            class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="6" y="3" width="12" height="18" rx="2"></rect>
+                            </svg>
+                            Vertical (2:3)
+                        </button>
+                        <button type="button" id="btnHorizontal"
+                            class="flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all">
+                            <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="6" width="18" height="12" rx="2"></rect>
+                            </svg>
+                            Horizontal (3:2)
+                        </button>
+                    </div>
+
+                    <!-- Inputs de Altura e Largura -->
+                    <div class="grid grid-cols-2 gap-3 mb-4">
+                        <div class="bg-studio-950 border border-slate-800 rounded-xl p-3 focus-within:border-cyan-500 transition-colors">
+                            <label for="targetHeight" class="block text-xs text-slate-400 mb-1">Altura do Alvo (m)</label>
+                            <div class="flex items-baseline justify-between">
+                                <input type="number" id="targetHeight" min="0.1" max="100" step="0.1" value="3.00"
+                                    class="w-full bg-transparent text-xl font-bold text-white focus:outline-none">
+                                <span class="text-xs font-semibold text-slate-500 ml-1">m</span>
+                            </div>
+                        </div>
+                        <div class="bg-studio-950 border border-slate-800 rounded-xl p-3 focus-within:border-cyan-500 transition-colors">
+                            <label for="targetWidth" class="block text-xs text-slate-400 mb-1">Largura do Alvo (m)</label>
+                            <div class="flex items-baseline justify-between">
+                                <input type="number" id="targetWidth" min="0.1" max="100" step="0.1" value="2.00"
+                                    class="w-full bg-transparent text-xl font-bold text-white focus:outline-none">
+                                <span class="text-xs font-semibold text-slate-500 ml-1">m</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Checkbox de Trava de Proporção -->
+                    <label class="flex items-start gap-2.5 cursor-pointer select-none p-2.5 rounded-xl bg-studio-850/60 border border-slate-800/80 hover:border-slate-700 transition-colors">
+                        <input type="checkbox" id="lockRatio" checked
+                            class="mt-0.5 w-4 h-4 rounded border-slate-600 bg-studio-950 text-amber-500 focus:ring-amber-500/40 accent-amber-500">
+                        <div class="text-xs">
+                            <span class="font-medium text-slate-200 block">Manter proporção 3:2 / 2:3</span>
+                            <span class="text-slate-400">Se desmarcado, calcula a distância garantindo que todo o retângulo caiba no quadro.</span>
+                        </div>
+                    </label>
+                </div>
+
+            </section>
+
+            <!-- COLUNA DIREITA: RESULTADO PRINCIPAL + VISUALIZADORES SVG -->
+            <section class="lg:col-span-7 space-y-5">
+
+                <!-- Cartão de Resultado Principal -->
+                <div class="bg-gradient-to-br from-studio-900 via-studio-900 to-studio-850 border border-slate-700/80 rounded-2xl p-6 shadow-2xl relative overflow-hidden">
+                    <!-- Detalhe decorativo sutil -->
+                    <div class="absolute -right-12 -top-12 w-44 h-44 bg-amber-500/10 rounded-full blur-3xl pointer-events-none"></div>
+                    <div class="absolute -left-12 -bottom-12 w-44 h-44 bg-cyan-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+                    <div class="relative z-10">
+                        <div class="flex flex-wrap items-center justify-between gap-2 mb-2">
+                            <span class="text-xs font-semibold uppercase tracking-widest text-amber-400">
+                                Distância Necessária até o Alvo
+                            </span>
+                            <span id="limitingAxisBadge" class="text-[11px] font-medium text-slate-300 bg-studio-950/80 border border-slate-700 px-2.5 py-0.5 rounded-full">
+                                Enquadramento exato 2:3
+                            </span>
+                        </div>
+
+                        <div class="flex items-baseline gap-3 mb-6">
+                            <span id="resultDistance" class="text-5xl sm:text-6xl font-extrabold tracking-tight text-white">
+                                6,38 m
+                            </span>
+                            <span id="resultSteps" class="text-sm sm:text-base font-medium text-cyan-400">
+                                (~8,5 passos)
+                            </span>
+                        </div>
+
+                        <!-- Métricas Secundárias -->
+                        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 pt-4 border-t border-slate-800/90">
+                            <div class="bg-studio-950/70 border border-slate-800/80 rounded-xl p-3">
+                                <span class="block text-[11px] uppercase tracking-wider text-slate-400 mb-0.5">Equiv. Full Frame</span>
+                                <span id="metricEquiv" class="text-lg font-bold text-amber-400">76,6 mm</span>
+                            </div>
+                            <div class="bg-studio-950/70 border border-slate-800/80 rounded-xl p-3">
+                                <span class="block text-[11px] uppercase tracking-wider text-slate-400 mb-0.5">Ângulo de Visão (V × H)</span>
+                                <span id="metricFov" class="text-lg font-bold text-cyan-400">26,5° × 17,8°</span>
+                            </div>
+                            <div class="bg-studio-950/70 border border-slate-800/80 rounded-xl p-3">
+                                <span class="block text-[11px] uppercase tracking-wider text-slate-400 mb-0.5">Quadro Capturado</span>
+                                <span id="metricCaptured" class="text-lg font-bold text-slate-200">3,00 × 2,00 m</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Grid dos Visualizadores Gráficos Interativos -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+                    <!-- Visualizador A: Prévia do Visor / Enquadramento -->
+                    <div class="bg-studio-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                                Prévia do Visor (Enquadramento)
+                            </h3>
+                            <span id="viewfinderRatioLabel" class="text-[11px] font-mono text-amber-400 bg-amber-950/40 border border-amber-800/40 px-2 py-0.5 rounded">
+                                2:3 Vertical
+                            </span>
+                        </div>
+
+                        <!-- Container SVG do Visor -->
+                        <div class="flex-1 flex items-center justify-center bg-studio-950 border border-slate-800/90 rounded-xl p-2 min-h-[270px]">
+                            <svg id="svgViewfinder" viewBox="0 0 320 280" class="w-full h-full max-h-[280px] select-none"></svg>
+                        </div>
+
+                        <!-- Controle de Altura da Pessoa (Silhueta) -->
+                        <div class="mt-3 pt-3 border-t border-slate-800/80">
+                            <div class="flex items-center justify-between text-xs mb-1.5">
+                                <span class="text-slate-400">Referência de escala (Pessoa):</span>
+                                <span id="personHeightLabel" class="font-mono font-semibold text-cyan-400">1,75 m</span>
+                            </div>
+                            <input type="range" id="personHeightSlider" min="0.50" max="2.20" step="0.05" value="1.75" class="w-full cyan-slider">
+                        </div>
+                    </div>
+
+                    <!-- Visualizador B: Diagrama Lateral do Cone de Visão -->
+                    <div class="bg-studio-900 border border-slate-800 rounded-2xl p-5 shadow-xl flex flex-col">
+                        <div class="flex items-center justify-between mb-3">
+                            <h3 class="text-xs font-semibold uppercase tracking-wider text-slate-300">
+                                Diagrama Lateral (Cone de Visão)
+                            </h3>
+                            <span id="coneAngleBadge" class="text-[11px] font-mono text-cyan-400 bg-cyan-950/40 border border-cyan-800/40 px-2 py-0.5 rounded">
+                                26,5° Vert.
+                            </span>
+                        </div>
+
+                        <!-- Container SVG do Cone Lateral -->
+                        <div class="flex-1 flex items-center justify-center bg-studio-950 border border-slate-800/90 rounded-xl p-2 min-h-[270px]">
+                            <svg id="svgSideView" viewBox="0 0 340 280" class="w-full h-full max-h-[280px] select-none"></svg>
+                        </div>
+
+                        <!-- Legenda rápida do diagrama -->
+                        <div class="mt-3 pt-3 border-t border-slate-800/80 flex items-center justify-between text-[11px] text-slate-400">
+                            <span class="flex items-center gap-1.5">
+                                <span class="w-2.5 h-2.5 rounded-sm bg-amber-500/40 border border-amber-400"></span>
+                                Cone Óptico
+                            </span>
+                            <span class="flex items-center gap-1.5">
+                                <span class="w-2.5 h-0.5 bg-cyan-400"></span>
+                                Plano Focal (Alvo)
+                            </span>
+                        </div>
+                    </div>
+
+                </div>
+
+            </section>
+        </div>
+
+        <!-- TABELA COMPARATIVA POR ESCALA DE LENTE -->
+        <section class="bg-studio-900 border border-slate-800 rounded-2xl shadow-xl overflow-hidden">
+            <div class="p-5 sm:p-6 border-b border-slate-800 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
+                <div>
+                    <h2 class="text-base sm:text-lg font-bold text-white flex items-center gap-2">
+                        <span class="w-1.5 h-5 rounded-full bg-amber-500"></span>
+                        Distância por Milimetragem (Tabela Comparativa)
+                    </h2>
+                    <p class="text-xs sm:text-sm text-slate-400 mt-0.5">
+                        Clique em qualquer linha para selecionar a lente instantaneamente.
+                    </p>
+                </div>
+                <div id="tableContextBadge" class="text-xs font-mono text-slate-300 bg-studio-950 border border-slate-800 px-3 py-1.5 rounded-lg self-start sm:self-auto">
+                    Alvo: 3,00 × 2,00 m • APS-C 1.5x
+                </div>
+            </div>
+
+            <div class="overflow-x-auto">
+                <table class="w-full text-left border-collapse">
+                    <thead>
+                        <tr class="bg-studio-950/70 text-slate-400 text-xs uppercase tracking-wider border-b border-slate-800">
+                            <th class="py-3.5 px-4 sm:px-6 font-semibold">Lente (mm)</th>
+                            <th class="py-3.5 px-4 sm:px-6 font-semibold">Equiv. 35mm</th>
+                            <th class="py-3.5 px-4 sm:px-6 font-semibold">Distância Necessária</th>
+                            <th class="py-3.5 px-4 sm:px-6 font-semibold">Ângulo de Visão (V × H)</th>
+                            <th class="py-3.5 px-4 sm:px-6 font-semibold text-right hidden sm:table-cell">Passos (~0,75m)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="comparisonTableBody" class="divide-y divide-slate-800/70 text-sm">
+                        <!-- Linhas geradas dinamicamente via JS -->
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Rodapé -->
+    <footer class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 text-center text-xs text-slate-500 border-t border-slate-800/60 mt-8">
+        Fórmula óptica utilizada: <code class="text-slate-400">D = f × (Dimensão_Alvo / Dimensão_Sensor)</code> • Valores aproximados para lentes retilíneas focadas no infinito/distâncias padrão.
+    </footer>
+
+    <!-- Lógica JavaScript Completa -->
+    <script>
+        /**
+         * ============================================================================
+         * CONFIGURAÇÕES E ESTADO DA APLICAÇÃO
+         * ============================================================================
+         */
+        const SENSORS = [
+            { id: 'apsc15', name: 'APS-C 1.5x', sub: 'Nikon / Sony / Fuji', long: 23.5, short: 15.7 },
+            { id: 'ff',     name: 'Full Frame 35mm', sub: 'Sensor 36 × 24 mm', long: 36.0, short: 24.0 },
+            { id: 'apsc16', name: 'APS-C 1.6x', sub: 'Canon', long: 22.3, short: 14.9 },
+            { id: 'm43',    name: 'Micro 4/3', sub: 'Olympus / Panasonic', long: 17.3, short: 13.0 }
+        ];
+
+        const PRESET_FOCALS = [17, 24, 35, 50, 70, 85, 135, 200, 300, 400];
+        const TABLE_FOCALS  = [17, 24, 28, 35, 50, 70, 85, 105, 135, 200, 300, 400];
+
+        // Estado reativo central
+        const state = {
+            sensorId: 'apsc15',
+            focalLength: 50,
+            orientation: 'vertical', // 'vertical' (2:3) ou 'horizontal' (3:2)
+            targetHeight: 3.00,
+            targetWidth: 2.00,
+            lockRatio: true,
+            personHeight: 1.75
+        };
+
+        // Formatador numérico padrão brasileiro (vírgula para decimais)
+        function formatBR(value, decimals = 2) {
+            if (!isFinite(value) || isNaN(value)) return '0,00';
+            return value.toLocaleString('pt-BR', {
+                minimumFractionDigits: decimals,
+                maximumFractionDigits: decimals
+            });
+        }
+
+        // Retorna o objeto do sensor atual
+        function getCurrentSensor() {
+            return SENSORS.find(s => s.id === state.sensorId) || SENSORS[0];
+        }
+
+        /**
+         * ============================================================================
+         * MOTOR DE CÁLCULO ÓPTICO
+         * ============================================================================
+         * Calcula a distância necessária, ângulos de visão e dimensões capturadas
+         * para uma dada distância focal, sensor e retângulo alvo.
+         */
+        function calculateOptics(focalMm, sensor, orientation, targetH, targetW) {
+            // Define qual dimensão do sensor corresponde à altura (V) e largura (H) do quadro
+            const sensorV = orientation === 'vertical' ? sensor.long : sensor.short;
+            const sensorH = orientation === 'vertical' ? sensor.short : sensor.long;
+
+            // Fórmula óptica: D = f * (Dimensão_Alvo / Dimensão_Sensor)
+            // f e Dimensão_Sensor em mm se cancelam, resultando em D na mesma unidade do Alvo (metros)
+            const distForHeight = focalMm * (targetH / sensorV);
+            const distForWidth  = focalMm * (targetW / sensorH);
+
+            // Usa a maior distância para garantir que TODO o retângulo alvo caiba no enquadramento
+            const distance = Math.max(distForHeight, distForWidth);
+
+            // Dimensões reais capturadas pelo sensor nessa distância
+            const capturedH = (distance * sensorV) / focalMm;
+            const capturedW = (distance * sensorH) / focalMm;
+
+            // Ângulos de visão (Field of View) em graus
+            const fovV = 2 * Math.atan(sensorV / (2 * focalMm)) * (180 / Math.PI);
+            const fovH = 2 * Math.atan(sensorH / (2 * focalMm)) * (180 / Math.PI);
+
+            // Distância focal equivalente em 35mm (Full Frame) baseada no lado maior
+            const cropFactor = 36.0 / sensor.long;
+            const equiv35mm = focalMm * cropFactor;
+
+            // Estimativa de passos (~0,75m por passo)
+            const steps = distance / 0.75;
+
+            // Verifica qual eixo está limitando o enquadramento
+            let limitingAxis = 'exact';
+            if (Math.abs(distForHeight - distForWidth) > 0.01) {
+                limitingAxis = distForHeight > distForWidth ? 'height' : 'width';
+            }
+
+            return {
+                distance,
+                capturedH,
+                capturedW,
+                fovV,
+                fovH,
+                equiv35mm,
+                steps,
+                limitingAxis
+            };
+        }
+
+        /**
+         * ============================================================================
+         * REFERÊNCIAS DO DOM
+         * ============================================================================
+         */
+        const els = {
+            sensorButtons: document.getElementById('sensorButtons'),
+            sensorDimBadge: document.getElementById('sensorDimBadge'),
+            focalInput: document.getElementById('focalInput'),
+            focalSlider: document.getElementById('focalSlider'),
+            focalPresets: document.getElementById('focalPresets'),
+            btnVertical: document.getElementById('btnVertical'),
+            btnHorizontal: document.getElementById('btnHorizontal'),
+            targetHeight: document.getElementById('targetHeight'),
+            targetWidth: document.getElementById('targetWidth'),
+            lockRatio: document.getElementById('lockRatio'),
+            resultDistance: document.getElementById('resultDistance'),
+            resultSteps: document.getElementById('resultSteps'),
+            limitingAxisBadge: document.getElementById('limitingAxisBadge'),
+            metricEquiv: document.getElementById('metricEquiv'),
+            metricFov: document.getElementById('metricFov'),
+            metricCaptured: document.getElementById('metricCaptured'),
+            viewfinderRatioLabel: document.getElementById('viewfinderRatioLabel'),
+            svgViewfinder: document.getElementById('svgViewfinder'),
+            personHeightSlider: document.getElementById('personHeightSlider'),
+            personHeightLabel: document.getElementById('personHeightLabel'),
+            coneAngleBadge: document.getElementById('coneAngleBadge'),
+            svgSideView: document.getElementById('svgSideView'),
+            tableContextBadge: document.getElementById('tableContextBadge'),
+            comparisonTableBody: document.getElementById('comparisonTableBody')
+        };
+
+        /**
+         * ============================================================================
+         * RENDERIZAÇÃO DOS CONTROLES
+         * ============================================================================
+         */
+        function renderSensorButtons() {
+            els.sensorButtons.innerHTML = '';
+            SENSORS.forEach(sensor => {
+                const isActive = sensor.id === state.sensorId;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.className = `text-left p-3 rounded-xl border transition-all ${
+                    isActive
+                        ? 'bg-amber-500/15 border-amber-500 text-white shadow-md shadow-amber-500/10'
+                        : 'bg-studio-950/70 border-slate-800 text-slate-300 hover:border-slate-600 hover:bg-studio-850'
+                }`;
+                btn.innerHTML = `
+                    <div class="flex items-center justify-between">
+                        <span class="font-semibold text-sm ${isActive ? 'text-amber-400' : 'text-slate-200'}">${sensor.name}</span>
+                        ${isActive ? '<span class="w-2 h-2 rounded-full bg-amber-400"></span>' : ''}
+                    </div>
+                    <div class="text-[11px] text-slate-400 mt-0.5">${sensor.sub}</div>
+                `;
+                btn.addEventListener('click', () => {
+                    state.sensorId = sensor.id;
+                    updateAll();
+                });
+                els.sensorButtons.appendChild(btn);
+            });
+        }
+
+        function renderFocalPresets() {
+            els.focalPresets.innerHTML = '';
+            PRESET_FOCALS.forEach(mm => {
+                const isActive = state.focalLength === mm;
+                const btn = document.createElement('button');
+                btn.type = 'button';
+                btn.textContent = `${mm}mm`;
+                btn.className = `py-1.5 px-1 rounded-lg text-xs font-mono font-semibold border transition-all ${
+                    isActive
+                        ? 'bg-amber-500 text-slate-950 border-amber-400 shadow-sm shadow-amber-500/30'
+                        : 'bg-studio-950 text-slate-300 border-slate-800 hover:border-slate-600 hover:text-white'
+                }`;
+                btn.addEventListener('click', () => {
+                    state.focalLength = mm;
+                    els.focalInput.value = mm;
+                    els.focalSlider.value = mm;
+                    updateAll();
+                });
+                els.focalPresets.appendChild(btn);
+            });
+        }
+
+        function renderOrientationButtons() {
+            const isVert = state.orientation === 'vertical';
+            const activeClass = 'bg-cyan-500/15 border-cyan-400 text-cyan-300 shadow-sm shadow-cyan-500/10';
+            const inactiveClass = 'bg-studio-950/70 border-slate-800 text-slate-400 hover:border-slate-600 hover:text-slate-200';
+
+            els.btnVertical.className = `flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${isVert ? activeClass : inactiveClass}`;
+            els.btnHorizontal.className = `flex items-center justify-center gap-2 px-3 py-2.5 rounded-xl border text-sm font-medium transition-all ${!isVert ? activeClass : inactiveClass}`;
+        }
+
+        /**
+         * ============================================================================
+         * VISUALIZADOR A: PRÉVIA DO VISOR / ENQUADRAMENTO (SVG)
+         * ============================================================================
+         */
+        function renderViewfinderSVG(optics) {
+            const svg = els.svgViewfinder;
+            const vbW = 320;
+            const vbH = 280;
+
+            // Área útil para desenhar o quadro da câmera (com margem para cotas externas)
+            const maxBoxW = 210;
+            const maxBoxH = 195;
+
+            const frameAspect = optics.capturedW / optics.capturedH;
+            let frameW, frameH;
+
+            if (frameAspect > maxBoxW / maxBoxH) {
+                frameW = maxBoxW;
+                frameH = maxBoxW / frameAspect;
+            } else {
+                frameH = maxBoxH;
+                frameW = maxBoxH * frameAspect;
+            }
+
+            const frameX = (vbW - frameW) / 2 + 12;
+            const frameY = (vbH - frameH) / 2 - 8;
+
+            // Dimensões do retângulo alvo dentro do quadro capturado
+            const targetWpx = (state.targetWidth / optics.capturedW) * frameW;
+            const targetHpx = (state.targetHeight / optics.capturedH) * frameH;
+            const targetX = frameX + (frameW - targetWpx) / 2;
+            const targetY = frameY + (frameH - targetHpx) / 2;
+
+            // Escala da silhueta humana (em pixels) baseada na altura capturada
+            const personPx = (state.personHeight / optics.capturedH) * frameH;
+            const clampedPersonPx = Math.min(personPx, frameH * 1.15);
+            const personCenterX = frameX + frameW / 2;
+            const personBaseY = targetY + targetHpx; // Pés apoiados na base do retângulo alvo
+
+            // Proporções anatômicas simples para a silhueta SVG
+            const headR = clampedPersonPx * 0.085;
+            const headCy = personBaseY - clampedPersonPx + headR;
+            const shoulderY = headCy + headR * 1.25;
+            const waistY = personBaseY - clampedPersonPx * 0.48;
+            const shoulderHalfW = clampedPersonPx * 0.14;
+            const hipHalfW = clampedPersonPx * 0.105;
+
+            // Verifica se o alvo tem proporção diferente do sensor (quando trava está desmarcada)
+            const showTargetOverlay = !state.lockRatio && (Math.abs(targetWpx - frameW) > 2 || Math.abs(targetHpx - frameH) > 2);
+
+            svg.innerHTML = `
+                <defs>
+                    <clipPath id="frameClip">
+                        <rect x="${frameX}" y="${frameY}" width="${frameW}" height="${frameH}" rx="3"></rect>
+                    </clipPath>
+                </defs>
+
+                <!-- Fundo do Quadro do Visor -->
+                <rect x="${frameX}" y="${frameY}" width="${frameW}" height="${frameH}" rx="3"
+                    fill="#0f172a" stroke="#f59e0b" stroke-width="2"></rect>
+
+                <!-- Grade de Regra dos Terços -->
+                <g stroke="#334155" stroke-width="1" stroke-dasharray="3 3" opacity="0.8">
+                    <line x1="${frameX + frameW / 3}" y1="${frameY}" x2="${frameX + frameW / 3}" y2="${frameY + frameH}"></line>
+                    <line x1="${frameX + (frameW * 2) / 3}" y1="${frameY}" x2="${frameX + (frameW * 2) / 3}" y2="${frameY + frameH}"></line>
+                    <line x1="${frameX}" y1="${frameY + frameH / 3}" x2="${frameX + frameW}" y2="${frameY + frameH / 3}"></line>
+                    <line x1="${frameX}" y1="${frameY + (frameH * 2) / 3}" x2="${frameX + frameW}" y2="${frameY + (frameH * 2) / 3}"></line>
+                </g>
+
+                <!-- Retângulo Alvo interno (se diferente do quadro do sensor) -->
+                ${showTargetOverlay ? `
+                    <rect x="${targetX}" y="${targetY}" width="${targetWpx}" height="${targetHpx}"
+                        fill="rgba(6, 182, 212, 0.08)" stroke="#06b6d4" stroke-width="1.5" stroke-dasharray="5 3"></rect>
+                ` : ''}
+
+                <!-- Silhueta Humana Proporcional (com recorte no visor) -->
+                <g clip-path="url(#frameClip)">
+                    <!-- Sombra no chão -->
+                    <ellipse cx="${personCenterX}" cy="${personBaseY}" rx="${shoulderHalfW * 1.1}" ry="${Math.max(2, clampedPersonPx * 0.018)}" fill="#06b6d4" opacity="0.25"></ellipse>
+                    <!-- Cabeça -->
+                    <circle cx="${personCenterX}" cy="${headCy}" r="${headR}" fill="#22d3ee" opacity="0.85"></circle>
+                    <!-- Tronco e Pernas -->
+                    <path d="
+                        M ${personCenterX - shoulderHalfW} ${shoulderY}
+                        Q ${personCenterX} ${shoulderY - headR * 0.35} ${personCenterX + shoulderHalfW} ${shoulderY}
+                        L ${personCenterX + hipHalfW} ${waistY}
+                        L ${personCenterX + hipHalfW * 0.85} ${personBaseY}
+                        L ${personCenterX + hipHalfW * 0.2} ${personBaseY}
+                        L ${personCenterX} ${waistY + clampedPersonPx * 0.06}
+                        L ${personCenterX - hipHalfW * 0.2} ${personBaseY}
+                        L ${personCenterX - hipHalfW * 0.85} ${personBaseY}
+                        L ${personCenterX - hipHalfW} ${waistY}
+                        Z
+                    " fill="#06b6d4" opacity="0.75"></path>
+                </g>
+
+                <!-- Marcações de Canto (Estilo Viewfinder de Câmera) -->
+                <g stroke="#fbbf24" stroke-width="2" fill="none">
+                    <path d="M ${frameX} ${frameY + 10} L ${frameX} ${frameY} L ${frameX + 10} ${frameY}"></path>
+                    <path d="M ${frameX + frameW - 10} ${frameY} L ${frameX + frameW} ${frameY} L ${frameX + frameW} ${frameY + 10}"></path>
+                    <path d="M ${frameX} ${frameY + frameH - 10} L ${frameX} ${frameY + frameH} L ${frameX + 10} ${frameY + frameH}"></path>
+                    <path d="M ${frameX + frameW - 10} ${frameY + frameH} L ${frameX + frameW} ${frameY + frameH} L ${frameX + frameW} ${frameY + frameH - 10}"></path>
+                </g>
+
+                <!-- Cota Externa: Altura (Esquerda) -->
+                <g stroke="#94a3b8" stroke-width="1">
+                    <line x1="${frameX - 16}" y1="${frameY}" x2="${frameX - 16}" y2="${frameY + frameH}"></line>
+                    <line x1="${frameX - 20}" y1="${frameY}" x2="${frameX - 12}" y2="${frameY}"></line>
+                    <line x1="${frameX - 20}" y1="${frameY + frameH}" x2="${frameX - 12}" y2="${frameY + frameH}"></line>
+                </g>
+                <text x="${frameX - 24}" y="${frameY + frameH / 2}" fill="#e2e8f0" font-size="11" font-weight="600" font-family="Inter, sans-serif"
+                    text-anchor="middle" transform="rotate(-90, ${frameX - 24}, ${frameY + frameH / 2})">
+                    ${formatBR(optics.capturedH, 2)} m
+                </text>
+
+                <!-- Cota Externa: Largura (Inferior) -->
+                <g stroke="#94a3b8" stroke-width="1">
+                    <line x1="${frameX}" y1="${frameY + frameH + 16}" x2="${frameX + frameW}" y2="${frameY + frameH + 16}"></line>
+                    <line x1="${frameX}" y1="${frameY + frameH + 12}" x2="${frameX}" y2="${frameY + frameH + 20}"></line>
+                    <line x1="${frameX + frameW}" y1="${frameY + frameH + 12}" x2="${frameX + frameW}" y2="${frameY + frameH + 20}"></line>
+                </g>
+                <text x="${frameX + frameW / 2}" y="${frameY + frameH + 32}" fill="#e2e8f0" font-size="11" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">
+                    ${formatBR(optics.capturedW, 2)} m
+                </text>
+            `;
+        }
+
+        /**
+         * ============================================================================
+         * VISUALIZADOR B: DIAGRAMA LATERAL DO CONE DE VISÃO (SVG)
+         * ============================================================================
+         */
+        function renderSideViewSVG(optics) {
+            const svg = els.svgSideView;
+
+            // Coordenadas base do diagrama lateral
+            const camX = 52;
+            const centerY = 128;
+            const targetX = 275;
+
+            // Altura visual do plano focal no SVG varia suavemente conforme o ângulo vertical (FOV)
+            // para transmitir visualmente a diferença entre grande-angular e teleobjetiva
+            const clampedFov = Math.max(6, Math.min(95, optics.fovV));
+            const halfSpread = 22 + ((clampedFov - 6) / (95 - 6)) * 68; // de 22px a 90px
+
+            const topY = centerY - halfSpread;
+            const botY = centerY + halfSpread;
+            const totalTargetPx = halfSpread * 2;
+
+            // Altura da barra indicadora da pessoa no plano do alvo
+            const personRatio = Math.min(1, state.personHeight / optics.capturedH);
+            const personBarH = totalTargetPx * personRatio;
+
+            svg.innerHTML = `
+                <defs>
+                    <linearGradient id="coneGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" stop-color="#f59e0b" stop-opacity="0.45"></stop>
+                        <stop offset="100%" stop-color="#f59e0b" stop-opacity="0.06"></stop>
+                    </linearGradient>
+                </defs>
+
+                <!-- Linha de eixo óptico central -->
+                <line x1="${camX}" y1="${centerY}" x2="${targetX}" y2="${centerY}"
+                    stroke="#334155" stroke-width="1" stroke-dasharray="4 4"></line>
+
+                <!-- Cone de Visão (Triângulo) -->
+                <polygon points="${camX},${centerY} ${targetX},${topY} ${targetX},${botY}"
+                    fill="url(#coneGrad)" stroke="#f59e0b" stroke-width="1.5" stroke-linejoin="round"></polygon>
+
+                <!-- Arco indicando o ângulo na câmera -->
+                <path d="M ${camX + 28} ${centerY - (halfSpread * 28 / (targetX - camX))} A 28 28 0 0 1 ${camX + 28} ${centerY + (halfSpread * 28 / (targetX - camX))}"
+                    fill="none" stroke="#fbbf24" stroke-width="1.5" opacity="0.8"></path>
+
+                <!-- Plano do Alvo (Linha vertical ciano) -->
+                <line x1="${targetX}" y1="${topY}" x2="${targetX}" y2="${botY}"
+                    stroke="#06b6d4" stroke-width="3" stroke-linecap="round"></line>
+
+                <!-- Indicador proporcional da pessoa no plano do alvo -->
+                <line x1="${targetX + 6}" y1="${botY - personBarH}" x2="${targetX + 6}" y2="${botY}"
+                    stroke="#22d3ee" stroke-width="3" stroke-linecap="round" opacity="0.7"></line>
+
+                <!-- Ícone da Câmera à Esquerda -->
+                <g transform="translate(${camX - 28}, ${centerY - 12})">
+                    <rect x="0" y="3" width="22" height="18" rx="3" fill="#1e293b" stroke="#94a3b8" stroke-width="1.5"></rect>
+                    <path d="M 5 3 L 7 0 L 14 0 L 16 3" fill="#1e293b" stroke="#94a3b8" stroke-width="1.5"></path>
+                    <rect x="22" y="6" width="6" height="12" rx="1.5" fill="#f59e0b"></rect>
+                    <circle cx="11" cy="12" r="3" fill="#0f172a" stroke="#64748b" stroke-width="1"></circle>
+                </g>
+
+                <!-- Cota da Altura do Plano Focal (Direita) -->
+                <text x="${targetX + 16}" y="${centerY + 4}" fill="#22d3ee" font-size="11" font-weight="700" font-family="Inter, sans-serif">
+                    ${formatBR(optics.capturedH, 2)} m
+                </text>
+
+                <!-- Cota de Distância (Base) -->
+                <g stroke="#94a3b8" stroke-width="1.2">
+                    <line x1="${camX}" y1="242" x2="${targetX}" y2="242"></line>
+                    <line x1="${camX}" y1="236" x2="${camX}" y2="248"></line>
+                    <line x1="${targetX}" y1="236" x2="${targetX}" y2="248"></line>
+                </g>
+                <!-- Etiqueta destacada da distância -->
+                <rect x="${(camX + targetX) / 2 - 42}" y="229" width="84" height="24" rx="6" fill="#0f172a" stroke="#f59e0b" stroke-width="1.2"></rect>
+                <text x="${(camX + targetX) / 2}" y="245" fill="#fbbf24" font-size="12" font-weight="700" font-family="Inter, sans-serif" text-anchor="middle">
+                    ${formatBR(optics.distance, 2)} m
+                </text>
+
+                <!-- Rótulo da Lente abaixo da câmera -->
+                <text x="${camX - 14}" y="${centerY + 26}" fill="#94a3b8" font-size="10" font-weight="600" font-family="Inter, sans-serif" text-anchor="middle">
+                    ${state.focalLength} mm
+                </text>
+            `;
+        }
+
+        /**
+         * ============================================================================
+         * TABELA COMPARATIVA POR ESCALA DE LENTE
+         * ============================================================================
+         */
+        function renderComparisonTable() {
+            const sensor = getCurrentSensor();
+            els.tableContextBadge.textContent = `Alvo: ${formatBR(state.targetHeight, 2)} × ${formatBR(state.targetWidth, 2)} m • ${sensor.name}`;
+
+            els.comparisonTableBody.innerHTML = '';
+
+            TABLE_FOCALS.forEach(mm => {
+                const res = calculateOptics(mm, sensor, state.orientation, state.targetHeight, state.targetWidth);
+                const isSelected = state.focalLength === mm;
+
+                const tr = document.createElement('tr');
+                tr.className = `cursor-pointer transition-colors ${
+                    isSelected
+                        ? 'bg-amber-500/15 hover:bg-amber-500/20'
+                        : 'hover:bg-studio-850/80'
+                }`;
+
+                tr.innerHTML = `
+                    <td class="py-3 px-4 sm:px-6 font-mono font-bold ${isSelected ? 'text-amber-400' : 'text-white'}">
+                        <div class="flex items-center gap-2">
+                            ${isSelected ? '<span class="w-2 h-2 rounded-full bg-amber-400 shrink-0"></span>' : '<span class="w-2 h-2 rounded-full bg-transparent shrink-0"></span>'}
+                            ${mm} mm
+                        </div>
+                    </td>
+                    <td class="py-3 px-4 sm:px-6 font-mono text-slate-300">
+                        ${formatBR(res.equiv35mm, 1)} mm
+                    </td>
+                    <td class="py-3 px-4 sm:px-6 font-bold text-base ${isSelected ? 'text-amber-300' : 'text-cyan-400'}">
+                        ${formatBR(res.distance, 2)} m
+                    </td>
+                    <td class="py-3 px-4 sm:px-6 font-mono text-slate-300">
+                        ${formatBR(res.fovV, 1)}° × ${formatBR(res.fovH, 1)}°
+                    </td>
+                    <td class="py-3 px-4 sm:px-6 text-right font-mono text-slate-400 hidden sm:table-cell">
+                        ~${formatBR(res.steps, 1)}
+                    </td>
+                `;
+
+                tr.addEventListener('click', () => {
+                    state.focalLength = mm;
+                    els.focalInput.value = mm;
+                    els.focalSlider.value = mm;
+                    updateAll();
+                });
+
+                els.comparisonTableBody.appendChild(tr);
+            });
+        }
+
+        /**
+         * ============================================================================
+         * ATUALIZAÇÃO GERAL DA INTERFACE
+         * ============================================================================
+         */
+        function updateAll() {
+            const sensor = getCurrentSensor();
+            const optics = calculateOptics(
+                state.focalLength,
+                sensor,
+                state.orientation,
+                state.targetHeight,
+                state.targetWidth
+            );
+
+            // Atualiza badges e controles
+            els.sensorDimBadge.textContent = `${formatBR(sensor.long, 1)} × ${formatBR(sensor.short, 1)} mm`;
+            renderSensorButtons();
+            renderFocalPresets();
+            renderOrientationButtons();
+
+            // Atualiza cartão de resultado principal
+            els.resultDistance.textContent = `${formatBR(optics.distance, 2)} m`;
+            els.resultSteps.textContent = `(~${formatBR(optics.steps, 1)} passos)`;
+
+            if (optics.limitingAxis === 'exact') {
+                els.limitingAxisBadge.textContent = state.orientation === 'vertical' ? 'Enquadramento exato 2:3' : 'Enquadramento exato 3:2';
+            } else if (optics.limitingAxis === 'height') {
+                els.limitingAxisBadge.textContent = 'Limitado pela Altura do alvo';
+            } else {
+                els.limitingAxisBadge.textContent = 'Limitado pela Largura do alvo';
+            }
+
+            els.metricEquiv.textContent = `${formatBR(optics.equiv35mm, 1)} mm`;
+            els.metricFov.textContent = `${formatBR(optics.fovV, 1)}° × ${formatBR(optics.fovH, 1)}°`;
+            els.metricCaptured.textContent = `${formatBR(optics.capturedH, 2)} × ${formatBR(optics.capturedW, 2)} m`;
+
+            // Atualiza rótulos dos visualizadores
+            els.viewfinderRatioLabel.textContent = state.orientation === 'vertical' ? '2:3 Vertical' : '3:2 Horizontal';
+            els.personHeightLabel.textContent = `${formatBR(state.personHeight, 2)} m`;
+            els.coneAngleBadge.textContent = `${formatBR(optics.fovV, 1)}° Vert.`;
+
+            // Renderiza SVGs e Tabela
+            renderViewfinderSVG(optics);
+            renderSideViewSVG(optics);
+            renderComparisonTable();
+        }
+
+        /**
+         * ============================================================================
+         * LISTENERS DE EVENTOS (INTERAÇÃO EM TEMPO REAL)
+         * ============================================================================
+         */
+        // Slider de distância focal
+        els.focalSlider.addEventListener('input', (e) => {
+            const val = parseInt(e.target.value, 10);
+            if (!isNaN(val)) {
+                state.focalLength = val;
+                els.focalInput.value = val;
+                updateAll();
+            }
+        });
+
+        // Input numérico de distância focal
+        els.focalInput.addEventListener('input', (e) => {
+            let val = parseFloat(e.target.value);
+            if (!isNaN(val) && val >= 1) {
+                val = Math.min(2000, val);
+                state.focalLength = val;
+                els.focalSlider.value = Math.max(10, Math.min(600, val));
+                updateAll();
+            }
+        });
+
+        // Orientação: Vertical (2:3)
+        els.btnVertical.addEventListener('click', () => {
+            if (state.orientation !== 'vertical') {
+                state.orientation = 'vertical';
+                // Inverte altura e largura automaticamente
+                const temp = state.targetHeight;
+                state.targetHeight = state.targetWidth;
+                state.targetWidth = temp;
+                els.targetHeight.value = state.targetHeight.toFixed(2);
+                els.targetWidth.value = state.targetWidth.toFixed(2);
+                updateAll();
+            }
+        });
+
+        // Orientação: Horizontal (3:2)
+        els.btnHorizontal.addEventListener('click', () => {
+            if (state.orientation !== 'horizontal') {
+                state.orientation = 'horizontal';
+                // Inverte altura e largura automaticamente
+                const temp = state.targetHeight;
+                state.targetHeight = state.targetWidth;
+                state.targetWidth = temp;
+                els.targetHeight.value = state.targetHeight.toFixed(2);
+                els.targetWidth.value = state.targetWidth.toFixed(2);
+                updateAll();
+            }
+        });
+
+        // Input de Altura do Alvo
+        els.targetHeight.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            if (!isNaN(val) && val > 0) {
+                state.targetHeight = val;
+                if (state.lockRatio) {
+                    // Vertical (2:3) -> Largura = Altura * (2/3)
+                    // Horizontal (3:2) -> Largura = Altura * (3/2)
+                    state.targetWidth = state.orientation === 'vertical'
+                        ? (val * 2) / 3
+                        : (val * 3) / 2;
+                    els.targetWidth.value = state.targetWidth.toFixed(2);
+                }
+                updateAll();
+            }
+        });
+
+        // Input de Largura do Alvo
+        els.targetWidth.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            if (!isNaN(val) && val > 0) {
+                state.targetWidth = val;
+                if (state.lockRatio) {
+                    // Vertical (2:3) -> Altura = Largura * (3/2)
+                    // Horizontal (3:2) -> Altura = Largura * (2/3)
+                    state.targetHeight = state.orientation === 'vertical'
+                        ? (val * 3) / 2
+                        : (val * 2) / 3;
+                    els.targetHeight.value = state.targetHeight.toFixed(2);
+                }
+                updateAll();
+            }
+        });
+
+        // Checkbox de trava de proporção
+        els.lockRatio.addEventListener('change', (e) => {
+            state.lockRatio = e.target.checked;
+            if (state.lockRatio) {
+                // Reajusta a largura com base na altura atual ao reativar a trava
+                state.targetWidth = state.orientation === 'vertical'
+                    ? (state.targetHeight * 2) / 3
+                    : (state.targetHeight * 3) / 2;
+                els.targetWidth.value = state.targetWidth.toFixed(2);
+            }
+            updateAll();
+        });
+
+        // Slider de altura da pessoa (silhueta de referência)
+        els.personHeightSlider.addEventListener('input', (e) => {
+            const val = parseFloat(e.target.value);
+            if (!isNaN(val)) {
+                state.personHeight = val;
+                updateAll();
+            }
+        });
+
+        // Inicialização ao carregar a página
+        window.addEventListener('DOMContentLoaded', () => {
+            updateAll();
+        });
+    </script>
+</body>
+</html>
